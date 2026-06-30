@@ -1,10 +1,10 @@
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Job
 from .serializers import JobSerializer
 from .permissions import IsEmployerOrReadOnly
-
 
 class JobViewSet(viewsets.ModelViewSet):
 
@@ -18,7 +18,11 @@ class JobViewSet(viewsets.ModelViewSet):
     ]
 
     filter_backends = [
+
+        DjangoFilterBackend,
+
         filters.SearchFilter,
+
         filters.OrderingFilter,
     ]
 
@@ -37,6 +41,16 @@ class JobViewSet(viewsets.ModelViewSet):
 
     ordering = [
         "-created_at"
+    ]
+
+    filterset_fields = [
+
+        "location",
+
+        "job_type",
+
+        "company",
+
     ]
 
     def perform_create(self, serializer):
