@@ -1,3 +1,7 @@
+import { useState } from "react";
+
+import SearchBar from "../components/SearchBar";
+import FilterSidebar from "../components/FilterSidebar";
 import JobCard from "../components/JobCard";
 
 const jobs = [
@@ -28,17 +32,27 @@ const jobs = [
 ];
 
 export default function JobList() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">
-        Available Jobs
-      </h1>
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {jobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
+  return (
+    <>
+      <SearchBar
+        search={search}
+        setSearch={setSearch}
+        location={location}
+        setLocation={setLocation}
+      />
+
+      <div className="grid lg:grid-cols-4 gap-8">
+        <FilterSidebar />
+
+        <div className="lg:col-span-3 grid md:grid-cols-2 gap-6">
+          {jobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
