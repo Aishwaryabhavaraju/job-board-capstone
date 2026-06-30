@@ -94,16 +94,36 @@ export default function JobList() {
         <div className="lg:col-span-3">
           <div className="grid gap-6 sm:grid-cols-2">
 
-            {loading
-              ? Array.from({ length: 6 }).map((_, index) => (
-                  <JobCardSkeleton key={index} />
-                ))
-              : jobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                  />
-                ))}
+            {loading ? (
+
+              Array.from({ length: 6 }).map((_, index) => (
+                <JobCardSkeleton key={index} />
+              ))
+
+            ) : jobs.length === 0 ? (
+
+              <div className="col-span-full text-center py-20">
+
+                <h2 className="text-2xl font-bold">
+                  No Jobs Found
+                </h2>
+
+                <p className="text-gray-500 mt-3">
+                  Try another search.
+                </p>
+
+              </div>
+
+            ) : (
+
+              jobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                />
+              ))
+
+            )}
 
           </div>
         </div>
