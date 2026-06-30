@@ -1,8 +1,8 @@
 import { useState } from "react";
 
+import JobCard from "../components/JobCard";
 import SearchBar from "../components/SearchBar";
 import FilterSidebar from "../components/FilterSidebar";
-import JobCard from "../components/JobCard";
 
 const jobs = [
   {
@@ -16,7 +16,7 @@ const jobs = [
   {
     id: 2,
     title: "Backend Developer",
-    company: "InnovateX",
+    company: "CodeCraft",
     location: "Bangalore",
     salary: "₹10 LPA",
     jobType: "Remote",
@@ -29,6 +29,30 @@ const jobs = [
     salary: "₹7 LPA",
     jobType: "Hybrid",
   },
+  {
+    id: 4,
+    title: "Python Developer",
+    company: "NextGen Solutions",
+    location: "Pune",
+    salary: "₹9 LPA",
+    jobType: "Full Time",
+  },
+  {
+    id: 5,
+    title: "DevOps Engineer",
+    company: "CloudTech",
+    location: "Remote",
+    salary: "₹12 LPA",
+    jobType: "Remote",
+  },
+  {
+    id: 6,
+    title: "Data Analyst",
+    company: "Insight Analytics",
+    location: "Mumbai",
+    salary: "₹6 LPA",
+    jobType: "Full Time",
+  },
 ];
 
 export default function JobList() {
@@ -36,7 +60,12 @@ export default function JobList() {
   const [location, setLocation] = useState("");
 
   return (
-    <>
+    <div className="py-10">
+
+      <h1 className="text-4xl font-bold mb-8">
+        Explore Jobs
+      </h1>
+
       <SearchBar
         search={search}
         setSearch={setSearch}
@@ -45,14 +74,26 @@ export default function JobList() {
       />
 
       <div className="grid lg:grid-cols-4 gap-8">
-        <FilterSidebar />
 
-        <div className="lg:col-span-3 grid md:grid-cols-2 gap-6">
-          {jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <FilterSidebar />
         </div>
+
+        {/* Job Grid */}
+        <div className="lg:col-span-3">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+              />
+            ))}
+          </div>
+        </div>
+
       </div>
-    </>
+
+    </div>
   );
 }
