@@ -42,8 +42,12 @@ class Application(models.Model):
 
     class Meta:
         ordering = ["-applied_at"]
-
-        unique_together = ("job", "applicant")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["job", "applicant"],
+                name="unique_job_application"
+            )
+        ]
 
     def __str__(self):
         return f"{self.applicant.username} applied for {self.job.title}"
