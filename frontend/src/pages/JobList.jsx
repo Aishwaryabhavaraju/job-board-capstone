@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import JobCard from "../components/JobCard";
+import JobCardSkeleton from "../components/JobCardSkeleton";
 import SearchBar from "../components/SearchBar";
 import FilterSidebar from "../components/FilterSidebar";
 
@@ -58,6 +59,15 @@ const jobs = [
 export default function JobList() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="py-10">
@@ -83,12 +93,18 @@ export default function JobList() {
         {/* Job Grid */}
         <div className="lg:col-span-3">
           <div className="grid gap-6 sm:grid-cols-2">
-            {jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-              />
-            ))}
+
+            {loading
+              ? Array.from({ length: 6 }).map((_, index) => (
+                  <JobCardSkeleton key={index} />
+                ))
+              : jobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                  />
+                ))}
+
           </div>
         </div>
 
