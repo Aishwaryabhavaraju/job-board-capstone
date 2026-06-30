@@ -18,11 +18,8 @@ class JobViewSet(viewsets.ModelViewSet):
     ]
 
     filter_backends = [
-
         DjangoFilterBackend,
-
         filters.SearchFilter,
-
         filters.OrderingFilter,
     ]
 
@@ -45,10 +42,9 @@ class JobViewSet(viewsets.ModelViewSet):
 
     filterset_fields = [
 
+        "title",
         "location",
-
         "job_type",
-
         "company",
 
     ]
