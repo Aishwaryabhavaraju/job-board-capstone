@@ -3,22 +3,26 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
 
     path(
         "admin/",
-        admin.site.urls,
+        admin.site.urls
     ),
 
     path(
         "api/",
-        include("accounts.urls"),
+        include("accounts.urls")
     ),
 
     path(
         "api/jobs/",
-        include("jobs.urls"),
+        include("jobs.urls")
+    ),
+
+    path(
+        "api/profiles/",
+        include("profiles.urls")
     ),
 
 ]
@@ -27,5 +31,5 @@ if settings.DEBUG:
 
     urlpatterns += static(
         settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
+        document_root=settings.MEDIA_ROOT
     )
