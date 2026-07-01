@@ -46,6 +46,7 @@ class JobViewSet(viewsets.ModelViewSet):
         "location",
         "job_type",
         "company",
+        "posted_by",
 
     ]
 

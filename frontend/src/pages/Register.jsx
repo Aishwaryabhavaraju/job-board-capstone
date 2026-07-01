@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
-import { notifySuccess, notifyError } from "../utils/toast";
+import { notifySuccess } from "../utils/toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -14,13 +18,16 @@ export default function Register() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  notifySuccess(
-    "Account created successfully!"
-  );
-};
+    const res = await register(form.username, form.email, form.password, form.role);
+
+    if (res.success) {
+      notifySuccess("Account created successfully! Please login.");
+      navigate("/login");
+    }
+  };
 
   return (
     <AuthLayout>

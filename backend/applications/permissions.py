@@ -18,10 +18,17 @@ class IsApplicantOrReadOnly(BasePermission):
 
 class IsRecruiterOrAdmin(BasePermission):
     """
-    Only recruiter or admin can change application status.
+    Only recruiter, admin, or the job's employer can change application status.
     """
 
     def has_permission(self, request, view):
         return request.user and (
-            request.user.is_staff or request.user.is_superuser
+            request.user.is_staff or 
+            request.user.is_superuser or 
+            request.user.role == "employer"
         )
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser or request.user.is_staff:
+            return True
+        return obj.job.posted_by == request.user

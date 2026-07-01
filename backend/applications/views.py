@@ -19,30 +19,50 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_anonymous:
+            return Application.objects.none()
 
-        # Applicants see only their applications
-        if not user.is_staff:
-            return Application.objects.filter(applicant=user)
+        # Admin/superuser sees all
+        if user.is_superuser or user.is_staff:
+            return Application.objects.all()
 
-        # Admin/recruiter sees all applications
-        return Application.objects.all()
+        # Employer sees applications for their posted jobs
+        if user.role == "employer":
+            return Application.objects.filter(job__posted_by=user)
+
+        # Candidate sees only their own applications
+        return Application.objects.filter(applicant=user)
 
     @action(detail=True, methods=['patch'], permission_classes=[IsRecruiterOrAdmin])
     def update_status(self, request, pk=None):
         """
-        Custom endpoint for recruiter/admin to update status
+        Custom endpoint for recruiter/employer/admin to update status
         Example: /applications/1/update_status/
         """
         application = self.get_object()
         new_status = request.data.get("status")
 
-        if new_status not in ['pending', 'accepted', 'rejected']:
+        if not new_status:
             return Response(
-                {"error": "Invalid status"},
+                {"error": "Status is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        application.status = new_status
+        status_map = {
+            "pending": "Pending",
+            "shortlisted": "Shortlisted",
+            "rejected": "Rejected",
+            "accepted": "Accepted",
+        }
+
+        normalized_status = status_map.get(str(new_status).lower())
+        if not normalized_status:
+            return Response(
+                {"error": "Invalid status. Choose from: Pending, Shortlisted, Rejected, Accepted"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        application.status = normalized_status
         application.save()
 
         return Response({

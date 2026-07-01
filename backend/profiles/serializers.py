@@ -138,6 +138,8 @@ class ApplicantProfileSerializer(serializers.ModelSerializer):
                 "Applicant profile already exists."
             )
 
+        validated_data.pop("user", None)
+
         profile = ApplicantProfile.objects.create(
 
             user=user,

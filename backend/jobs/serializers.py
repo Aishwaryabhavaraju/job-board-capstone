@@ -14,6 +14,11 @@ class JobSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    applications_count = serializers.IntegerField(
+        source="applications.count",
+        read_only=True
+    )
+
     class Meta:
 
         model = Job
@@ -41,6 +46,8 @@ class JobSerializer(serializers.ModelSerializer):
             "employer_name",
 
             "employer_email",
+
+            "applications_count",
 
             "created_at",
 

@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
-import { notifySuccess, notifyError } from "../utils/toast";
+import { notifySuccess } from "../utils/toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -12,18 +16,17 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Temporary until backend integration
-  const success = true;
+    const res = await login(form.email, form.password);
 
-  if (success) {
-    notifySuccess("Login successful!");
-  } else {
-    notifyError("Invalid email or password.");
-  }
-};
+    if (res.success) {
+      notifySuccess("Login successful!");
+      const targetPath = res.user.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard";
+      navigate(targetPath);
+    }
+  };
   return (
     <AuthLayout>
       <h2 className="text-2xl font-bold text-center mb-6">
