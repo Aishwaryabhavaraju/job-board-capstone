@@ -12,6 +12,12 @@ import JobDetail from "../pages/JobDetail";
 import EmployerDashboard from "../pages/EmployerDashboard";
 import CandidateDashboard from "../pages/CandidateDashboard";
 
+import PostJob from "../pages/PostJob";
+import MyJobs from "../pages/MyJobs";
+import EmployerApplications from "../pages/EmployerApplications";
+import AppliedJobs from "../pages/AppliedJobs";
+import SavedJobs from "../pages/SavedJobs";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -42,6 +48,31 @@ export default function AppRoutes() {
           element={<CandidateDashboard />}
         />
       </Route>
+
+      <Route
+        path="/employer/jobs/new"
+        element={<PostJob />}
+      />
+
+      <Route
+        path="/employer/jobs"
+        element={<MyJobs />}
+      />
+
+      <Route
+        path="/employer/applications"
+        element={<EmployerApplications />}
+      />
+
+      <Route
+        path="/candidate/applications"
+        element={<AppliedJobs />}
+      />
+
+      <Route
+        path="/candidate/saved"
+        element={<SavedJobs />}
+      />
 
     </Routes>
   );

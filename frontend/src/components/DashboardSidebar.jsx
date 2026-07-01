@@ -6,7 +6,6 @@ export default function DashboardSidebar({ role = "candidate" }) {
     { name: "Post Job", path: "/employer/jobs/new" },
     { name: "My Jobs", path: "/employer/jobs" },
     { name: "Applications", path: "/employer/applications" },
-    { name: "Profile", path: "/employer/profile" },
   ];
 
   const candidateLinks = [
@@ -14,7 +13,6 @@ export default function DashboardSidebar({ role = "candidate" }) {
     { name: "Browse Jobs", path: "/jobs" },
     { name: "Applied Jobs", path: "/candidate/applications" },
     { name: "Saved Jobs", path: "/candidate/saved" },
-    { name: "Profile", path: "/candidate/profile" },
   ];
 
   const links = role === "employer" ? employerLinks : candidateLinks;
