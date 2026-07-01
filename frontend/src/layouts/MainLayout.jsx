@@ -7,7 +7,17 @@ export default function MainLayout() {
     <>
       <Navbar />
 
-      <main className="min-h-screen max-w-7xl mx-auto px-6 py-8">
+      <main
+        className="
+          min-h-screen
+          max-w-7xl
+          mx-auto
+          px-4
+          sm:px-6
+          lg:px-8
+          py-8
+        "
+      >
         <Outlet />
       </main>
 
