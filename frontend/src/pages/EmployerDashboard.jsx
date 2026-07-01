@@ -10,7 +10,7 @@ export default function EmployerDashboard() {
         subtitle="Manage jobs and applications"
       />
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
         <StatCard
           title="Posted Jobs"
