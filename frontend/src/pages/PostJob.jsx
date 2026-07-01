@@ -6,7 +6,15 @@ import PageHeader from "../components/ui/PageHeader";
 
 export default function PostJob() {
   return (
-    <div className="max-w-5xl mx-auto py-8">
+    <div
+        className="
+            max-w-5xl
+            mx-auto
+            px-4
+            sm:px-6
+            py-8
+        "
+    >
       <PageHeader
         title="Post a New Job"
         subtitle="Fill in the details below to publish a new job."
@@ -68,7 +76,15 @@ export default function PostJob() {
             />
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div
+            className="
+                flex
+                flex-col
+                sm:flex-row
+                justify-end
+                gap-3
+            "
+          >
             <Button variant="secondary">
               Cancel
             </Button>
