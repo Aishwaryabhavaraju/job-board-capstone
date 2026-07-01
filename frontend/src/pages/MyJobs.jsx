@@ -2,6 +2,7 @@ import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import PageHeader from "../components/ui/PageHeader";
+import { notifySuccess, notifyWarning } from "../utils/toast";
 
 const jobs = [
   {

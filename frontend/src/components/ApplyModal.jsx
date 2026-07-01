@@ -1,4 +1,5 @@
 import Button from "./ui/Button";
+import { notifySuccess, notifyError } from "../utils/toast";
 
 export default function ApplyModal({ isOpen, onClose }) {
   if (!isOpen) return null;

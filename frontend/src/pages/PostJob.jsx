@@ -3,6 +3,7 @@ import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import Button from "../components/ui/Button";
 import PageHeader from "../components/ui/PageHeader";
+import { notifySuccess, notifyError } from "../utils/toast";
 
 export default function PostJob() {
   return (
