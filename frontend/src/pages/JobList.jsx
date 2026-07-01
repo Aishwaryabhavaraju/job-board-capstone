@@ -4,6 +4,7 @@ import JobCard from "../components/JobCard";
 import JobCardSkeleton from "../components/JobCardSkeleton";
 import SearchBar from "../components/SearchBar";
 import FilterSidebar from "../components/FilterSidebar";
+import EmptyState from "../components/ui/EmptyState";
 
 const jobs = [
   {
