@@ -13,10 +13,17 @@ export default function Login() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-  };
+  e.preventDefault();
 
+  // Temporary until backend integration
+  const success = true;
+
+  if (success) {
+    notifySuccess("Login successful!");
+  } else {
+    notifyError("Invalid email or password.");
+  }
+};
   return (
     <AuthLayout>
       <h2 className="text-2xl font-bold text-center mb-6">

@@ -1,6 +1,12 @@
 import Button from "./ui/Button";
 import { notifySuccess, notifyError } from "../utils/toast";
 
+const handleApply = () => {
+  notifySuccess("Application submitted!");
+
+  onClose();
+};
+
 export default function ApplyModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
@@ -48,9 +54,9 @@ export default function ApplyModal({ isOpen, onClose }) {
             Cancel
           </Button>
 
-          <Button>
-            Submit Application
-          </Button>
+          <Button onClick={handleApply}>
+  Submit Application
+</Button>
 
         </div>
 

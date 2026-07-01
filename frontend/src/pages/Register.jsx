@@ -15,9 +15,12 @@ export default function Register() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-  };
+  e.preventDefault();
+
+  notifySuccess(
+    "Account created successfully!"
+  );
+};
 
   return (
     <AuthLayout>

@@ -5,6 +5,12 @@ import Button from "../components/ui/Button";
 import PageHeader from "../components/ui/PageHeader";
 import { notifySuccess, notifyError } from "../utils/toast";
 
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  notifySuccess("Job posted successfully!");
+};
+
 export default function PostJob() {
   return (
     <div
@@ -22,7 +28,10 @@ export default function PostJob() {
       />
 
       <Card>
-        <form className="space-y-6">
+        <form
+  onSubmit={handleSubmit}
+  className="space-y-6"
+>
 
           <Input
             label="Job Title"
