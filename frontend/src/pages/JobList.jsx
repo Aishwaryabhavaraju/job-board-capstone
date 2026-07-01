@@ -83,7 +83,14 @@ export default function JobList() {
         setLocation={setLocation}
       />
 
-      <div className="grid lg:grid-cols-4 gap-8">
+      <div
+        className="
+          grid
+          grid-cols-1
+          lg:grid-cols-4
+          gap-8
+        "
+      >
 
         {/* Sidebar */}
         <div className="lg:col-span-1">
@@ -92,7 +99,15 @@ export default function JobList() {
 
         {/* Job Grid */}
         <div className="lg:col-span-3">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div
+            className="
+              grid
+              grid-cols-1
+              md:grid-cols-2
+              xl:grid-cols-3
+              gap-6
+            "
+          >
 
             {loading ? (
 
