@@ -1,4 +1,5 @@
 # Job Board Platform - Capstone Project
+DEMO VIDEO LINK: https://drive.google.com/file/d/1-hKWVErqsBS7O_poEZE6OwDRerh-l3UX/view?usp=sharing
 
 A full-stack, real-time Job Board platform built using a **Django REST Framework (DRF)** backend connected to a **PostgreSQL** database, and a dynamic **React** frontend styled with **Tailwind CSS**.
 
