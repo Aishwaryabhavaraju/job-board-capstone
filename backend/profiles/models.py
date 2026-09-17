@@ -18,9 +18,13 @@ class ApplicantProfile(models.Model):
         blank=True
     )
 
-    skills = models.TextField()
+    skills = models.TextField(
+        blank=True
+    )
 
-    education = models.TextField()
+    education = models.TextField(
+        blank=True
+    )
 
     experience = models.TextField(
         blank=True

@@ -1,308 +1,244 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import DashboardHeader from "../components/ui/DashboardHeader";
 import StatCard from "../components/ui/StatCard";
 import Card from "../components/ui/Card";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
-import { notifySuccess, notifyError } from "../utils/toast";
 import { useAuth, BASE_URL } from "../context/AuthContext";
 
 export default function CandidateDashboard() {
   const { user, authenticatedFetch } = useAuth();
-  const [appliedCount, setAppliedCount] = useState(0);
+  const [appliedJobs, setAppliedJobs] = useState([]);
   const [savedCount, setSavedCount] = useState(0);
-  const [loadingStats, setLoadingStats] = useState(true);
-
-  // Profile Form State
   const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState({
-    phone: "",
-    address: "",
-    skills: "",
-    education: "",
-    experience: "",
-    linkedin: "",
-    github: "",
-    portfolio: "",
-  });
-  const [resumeFile, setResumeFile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [submittingProfile, setSubmittingProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStatsAndProfile = async () => {
+    const fetchDashboardData = async () => {
       try {
-        setLoadingStats(true);
-        setLoadingProfile(true);
+        setLoading(true);
 
-        // Fetch applications count
+        // Fetch user applications
         const appRes = await authenticatedFetch(`${BASE_URL}/api/applications/`);
         if (appRes.ok) {
           const appData = await appRes.json();
           const list = Array.isArray(appData) ? appData : (appData.results || []);
-          setAppliedCount(list.length);
+          setAppliedJobs(list);
         }
 
-        // Fetch saved jobs count from localStorage
+        // Saved count from local storage
         const saved = JSON.parse(localStorage.getItem("saved_jobs") || "[]");
         setSavedCount(saved.length);
 
-        // Fetch profile
-        const profileRes = await authenticatedFetch(`${BASE_URL}/api/profiles/`);
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          if (profileData && profileData.length > 0) {
-            const prof = profileData[0];
-            setProfile(prof);
-            setForm({
-              phone: prof.phone || "",
-              address: prof.address || "",
-              skills: prof.skills || "",
-              education: prof.education || "",
-              experience: prof.experience || "",
-              linkedin: prof.linkedin || "",
-              github: prof.github || "",
-              portfolio: prof.portfolio || "",
-            });
+        // Fetch candidate profile
+        const profRes = await authenticatedFetch(`${BASE_URL}/api/profiles/`);
+        if (profRes.ok) {
+          const profData = await profRes.json();
+          const list = Array.isArray(profData) ? profData : (profData.results || []);
+          if (list.length > 0) {
+            setProfile(list[0]);
           }
         }
       } catch (err) {
-        console.error("Dashboard data load error:", err);
+        console.error("Dashboard load error:", err);
       } finally {
-        setLoadingStats(false);
-        setLoadingProfile(false);
+        setLoading(false);
       }
     };
 
     if (user) {
-      fetchStatsAndProfile();
+      fetchDashboardData();
     }
   }, [user]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Calculate profile completion score
+  const getProfileCompletion = () => {
+    if (!profile) return 20;
+    let score = 30; // base score for account
+    if (profile.phone) score += 15;
+    if (profile.skills) score += 15;
+    if (profile.education) score += 15;
+    if (profile.resume) score += 15;
+    if (profile.linkedin || profile.github || profile.portfolio) score += 10;
+    return Math.min(score, 100);
   };
 
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault();
+  const completionPercent = getProfileCompletion();
 
-    if (!form.phone || !form.skills || !form.education) {
-      notifyError("Phone, Skills, and Education are required fields.");
-      return;
-    }
-
-    setSubmittingProfile(true);
-    try {
-      const formData = new FormData();
-      formData.append("phone", form.phone);
-      formData.append("address", form.address);
-      formData.append("skills", form.skills);
-      formData.append("education", form.education);
-      formData.append("experience", form.experience);
-      formData.append("linkedin", form.linkedin);
-      formData.append("github", form.github);
-      formData.append("portfolio", form.portfolio);
-
-      if (resumeFile) {
-        formData.append("resume", resumeFile);
-      }
-
-      let res;
-      if (profile) {
-        // Update profile
-        res = await authenticatedFetch(`${BASE_URL}/api/profiles/${profile.id}/`, {
-          method: "PATCH",
-          body: formData,
-        });
-      } else {
-        // Create profile
-        res = await authenticatedFetch(`${BASE_URL}/api/profiles/`, {
-          method: "POST",
-          body: formData,
-        });
-      }
-
-      const data = await res.json();
-      if (res.ok) {
-        setProfile(data);
-        notifySuccess("Profile saved successfully!");
-        setResumeFile(null);
-      } else {
-        // Display validation errors from backend
-        let errorMsg = "Failed to save profile.";
-        if (data.phone) errorMsg = `Phone: ${data.phone[0]}`;
-        else if (data.resume) errorMsg = `Resume: ${data.resume[0]}`;
-        else if (data.non_field_errors) errorMsg = data.non_field_errors[0];
-        throw new Error(errorMsg);
-      }
-    } catch (err) {
-      notifyError(err.message);
-    } finally {
-      setSubmittingProfile(false);
+  const getStatusBadge = (status) => {
+    switch (status?.toLowerCase()) {
+      case "accepted":
+      case "shortlisted":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "rejected":
+        return "bg-rose-100 text-rose-800 border-rose-200";
+      default:
+        return "bg-amber-100 text-amber-800 border-amber-200";
     }
   };
 
   return (
-    <>
+    <div className="max-w-7xl mx-auto py-6 px-4">
       <DashboardHeader
-        title="Candidate Dashboard"
-        subtitle="Track your job applications and manage your profile."
+        title={`Welcome back, ${user?.username || "Candidate"}! 👋`}
+        subtitle="Track your applications, saved jobs, and profile status."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-10">
+      {/* Quick Action Banner & Profile Completion Progress */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        
+        {/* Profile Progress Card */}
+        <div className="lg:col-span-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-200 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+                Candidate Profile
+              </span>
+              <span className="text-xl font-bold">{completionPercent}% Complete</span>
+            </div>
+
+            <h2 className="text-2xl font-bold mb-2">Stand out to top recruiters</h2>
+            <p className="text-blue-100 text-sm max-w-xl">
+              Complete your skills, education, and resume to get matched faster with relevant job openings.
+            </p>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-white/20 rounded-full h-3 mt-4">
+              <div
+                className="bg-emerald-400 h-3 rounded-full transition-all duration-500 shadow-sm"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to="/profile"
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs py-2.5 px-5 rounded-xl transition shadow-md"
+            >
+              ✏️ Update Profile & Resume
+            </Link>
+            <Link
+              to="/jobs"
+              className="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs py-2.5 px-5 rounded-xl transition border border-white/20"
+            >
+              🔍 Browse New Jobs
+            </Link>
+          </div>
+        </div>
+
+        {/* Quick Links Card */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🚀</span> Quick Actions
+            </h3>
+            <div className="space-y-3">
+              <Link
+                to="/jobs"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold text-sm transition"
+              >
+                <span>Search All Jobs</span>
+                <span>→</span>
+              </Link>
+              <Link
+                to="/candidate/saved"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-amber-50 text-gray-700 hover:text-amber-700 font-semibold text-sm transition"
+              >
+                <span>Saved Jobs ({savedCount})</span>
+                <span>★</span>
+              </Link>
+              <Link
+                to="/candidate/applications"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 font-semibold text-sm transition"
+              >
+                <span>View Applications ({appliedJobs.length})</span>
+                <span>📂</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Metrics Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <StatCard
           title="Applied Jobs"
-          value={loadingStats ? "..." : appliedCount.toString()}
+          value={loading ? "..." : appliedJobs.length.toString()}
         />
 
         <StatCard
           title="Saved Jobs"
-          value={loadingStats ? "..." : savedCount.toString()}
+          value={loading ? "..." : savedCount.toString()}
+        />
+
+        <StatCard
+          title="Shortlisted / Accepted"
+          value={
+            loading
+              ? "..."
+              : appliedJobs
+                  .filter((a) => ["accepted", "shortlisted"].includes(a.status?.toLowerCase()))
+                  .length.toString()
+          }
         />
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">My Applicant Profile</h2>
-        {loadingProfile ? (
-          <div className="p-10 text-center bg-white rounded-xl shadow border">
-            Loading profile details...
-          </div>
-        ) : (
+      {/* Recent Applications Summary */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-gray-900">Recent Applications</h2>
+          <Link to="/candidate/applications" className="text-sm font-semibold text-blue-600 hover:underline">
+            View All →
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="p-8 text-center bg-white rounded-2xl border text-gray-500">Loading applications...</div>
+        ) : appliedJobs.length === 0 ? (
           <Card>
-            <form onSubmit={handleProfileSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                  <input
-                    name="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="9988776655"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Portfolio URL</label>
-                  <input
-                    name="portfolio"
-                    type="url"
-                    value={form.portfolio}
-                    onChange={handleChange}
-                    placeholder="https://myportfolio.com"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">LinkedIn URL</label>
-                  <input
-                    name="linkedin"
-                    type="url"
-                    value={form.linkedin}
-                    onChange={handleChange}
-                    placeholder="https://linkedin.com/in/username"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">GitHub URL</label>
-                  <input
-                    name="github"
-                    type="url"
-                    value={form.github}
-                    onChange={handleChange}
-                    placeholder="https://github.com/username"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Home Address</label>
-                <textarea
-                  name="address"
-                  rows="2"
-                  value={form.address}
-                  onChange={handleChange}
-                  placeholder="Street, City, Country"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Skills * (comma separated)</label>
-                <textarea
-                  name="skills"
-                  rows="2"
-                  value={form.skills}
-                  onChange={handleChange}
-                  placeholder="React, JavaScript, Python, Django, Tailwind CSS"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Education *</label>
-                <textarea
-                  name="education"
-                  rows="2"
-                  value={form.education}
-                  onChange={handleChange}
-                  placeholder="B.Tech in Computer Science - XYZ University (2020-2024)"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Experience</label>
-                <textarea
-                  name="experience"
-                  rows="3"
-                  value={form.experience}
-                  onChange={handleChange}
-                  placeholder="Frontend Developer Intern at ABC Corp (6 months) - built dashboard..."
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Upload/Change Resume (PDF, DOC, DOCX up to 5MB)</label>
-                {profile && profile.resume && (
-                  <div className="mb-3 text-sm text-green-700 bg-green-50 p-3 rounded-lg border border-green-200">
-                    ✓ Existing Resume:{" "}
-                    <a
-                      href={profile.resume}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline font-semibold hover:text-green-800"
-                    >
-                      View uploaded resume
-                    </a>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={(e) => setResumeFile(e.target.files[0])}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 file:hover:bg-blue-100 cursor-pointer"
-                />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={submittingProfile}>
-                  {submittingProfile ? "Saving Profile..." : (profile ? "Update Profile" : "Create Profile")}
-                </Button>
-              </div>
-            </form>
+            <div className="text-center py-10">
+              <p className="text-gray-500">You haven't applied for any jobs yet.</p>
+              <Link to="/jobs" className="mt-4 inline-block bg-blue-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-blue-700 transition">
+                Explore Jobs & Apply Now
+              </Link>
+            </div>
           </Card>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="divide-y divide-gray-100">
+              {appliedJobs.slice(0, 5).map((app) => (
+                <div key={app.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50/80 transition">
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-base">
+                      {app.job_details?.title || app.job?.title || "Job Position"}
+                    </h3>
+                    <p className="text-xs text-blue-600 font-semibold mt-0.5">
+                      {app.job_details?.company || app.job?.company || "Company"}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Applied on: {new Date(app.applied_at).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(app.status)}`}>
+                      {app.status || "Pending"}
+                    </span>
+                    <Link
+                      to={`/jobs/${app.job_details?.id || app.job?.id || app.job}`}
+                      className="text-xs font-semibold text-blue-600 hover:underline"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
-    </>
+
+    </div>
   );
 }

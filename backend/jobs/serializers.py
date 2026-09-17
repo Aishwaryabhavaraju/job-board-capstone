@@ -31,6 +31,8 @@ class JobSerializer(serializers.ModelSerializer):
 
             "company",
 
+            "company_url",
+
             "location",
 
             "job_type",

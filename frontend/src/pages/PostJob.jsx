@@ -18,6 +18,7 @@ export default function PostJob() {
   const [form, setForm] = useState({
     title: "",
     company: "",
+    company_url: "",
     location: "",
     job_type: "Full-Time",
     salary: "",
@@ -38,6 +39,7 @@ export default function PostJob() {
           setForm({
             title: data.title || "",
             company: data.company || "",
+            company_url: data.company_url || "",
             location: data.location || "",
             job_type: data.job_type || "Full-Time",
             salary: Math.round(Number(data.salary)) || "",
@@ -109,114 +111,111 @@ export default function PostJob() {
   }
 
   return (
-    <div
-      className="
-        max-w-5xl
-        mx-auto
-        px-4
-        sm:px-6
-        py-8
-      "
-    >
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <PageHeader
         title={isEditMode ? "Edit Job Listing" : "Post a New Job"}
-        subtitle={isEditMode ? "Modify details of the job listing." : "Fill in the details below to publish a new job."}
+        subtitle={isEditMode ? "Modify details of the job listing." : "Fill in the details below to publish a new job opening."}
       />
 
       <Card>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
-        >
-          <Input
-            label="Job Title"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Frontend Developer"
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-6">
 
-          <Input
-            label="Company"
-            name="company"
-            value={form.company}
-            onChange={handleChange}
-            placeholder="TechNova"
-            required
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Job Title *"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="e.g. Senior Frontend Engineer"
+              required
+            />
 
-          <Input
-            label="Location"
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            placeholder="Hyderabad"
-            required
-          />
+            <Input
+              label="Company Name *"
+              name="company"
+              value={form.company}
+              onChange={handleChange}
+              placeholder="e.g. TechCorp Solutions"
+              required
+            />
+          </div>
 
-          <Select
-            label="Job Type"
-            name="job_type"
-            value={form.job_type}
-            onChange={handleChange}
-          >
-            <option value="Full-Time">Full-Time</option>
-            <option value="Part-Time">Part-Time</option>
-            <option value="Internship">Internship</option>
-            <option value="Remote">Remote</option>
-            <option value="Contract">Contract</option>
-          </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Company Website / Link"
+              name="company_url"
+              type="url"
+              value={form.company_url}
+              onChange={handleChange}
+              placeholder="https://companywebsite.com"
+            />
 
-          <Input
-            label="Salary (Annual in INR)"
-            name="salary"
-            type="number"
-            value={form.salary}
-            onChange={handleChange}
-            placeholder="800000"
-            required
-          />
+            <Input
+              label="Location *"
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              placeholder="e.g. Bengaluru, Remote, San Francisco"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Select
+              label="Employment Type"
+              name="job_type"
+              value={form.job_type}
+              onChange={handleChange}
+            >
+              <option value="Full-Time">Full-Time</option>
+              <option value="Part-Time">Part-Time</option>
+              <option value="Internship">Internship</option>
+              <option value="Remote">Remote</option>
+              <option value="Contract">Contract</option>
+            </Select>
+
+            <Input
+              label="Annual Salary (in INR) *"
+              name="salary"
+              type="number"
+              value={form.salary}
+              onChange={handleChange}
+              placeholder="e.g. 1200000"
+              required
+            />
+          </div>
 
           <div>
-            <label className="block font-medium mb-2">
-              Description
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Job Description *
             </label>
             <textarea
               name="description"
-              rows="6"
+              rows="5"
               value={form.description}
               onChange={handleChange}
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Job description..."
+              className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              placeholder="Detailed description of responsibilities, team culture, and objectives..."
               required
             />
           </div>
 
           <div>
-            <label className="block font-medium mb-2">
-              Requirements
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Requirements & Skills *
             </label>
             <textarea
               name="requirements"
-              rows="5"
+              rows="4"
               value={form.requirements}
               onChange={handleChange}
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Requirements..."
+              className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              placeholder="Enter key requirements (e.g. 3+ years React, REST APIs, TypeScript)..."
               required
             />
           </div>
 
-          <div
-            className="
-              flex
-              flex-col
-              sm:flex-row
-              justify-end
-              gap-3
-            "
-          >
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="secondary"
@@ -227,7 +226,7 @@ export default function PostJob() {
             </Button>
 
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : (isEditMode ? "Update Job" : "Publish Job")}
+              {submitting ? "Saving..." : (isEditMode ? "Update Job Listing" : "Publish Job Post")}
             </Button>
           </div>
 

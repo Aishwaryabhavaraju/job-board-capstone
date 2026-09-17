@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { BASE_URL } from "../context/AuthContext";
 
 import JobCard from "../components/JobCard";
@@ -7,10 +8,14 @@ import SearchBar from "../components/SearchBar";
 import FilterSidebar from "../components/FilterSidebar";
 
 export default function JobList() {
+  const [searchParams] = useSearchParams();
+  const initialQ = searchParams.get("q") || "";
+  const initialLoc = searchParams.get("loc") || "";
+
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
+  const [search, setSearch] = useState(initialQ);
+  const [location, setLocation] = useState(initialLoc);
   const [jobType, setJobType] = useState("All");
   const [experience, setExperience] = useState("Any");
   const [salary, setSalary] = useState("Any");
@@ -22,15 +27,13 @@ export default function JobList() {
       const res = await fetch(`${BASE_URL}/api/jobs/`);
       if (res.ok) {
         const data = await res.json();
-        // Backend returns an array or paginated response. If it's a list:
         const jobList = Array.isArray(data) ? data : (data.results || []);
-        // Transform backend fields to match frontend JobCard key expectations if needed
-        const formatted = jobList.map(j => ({
+        const formatted = jobList.map((j) => ({
           id: j.id,
           title: j.title,
           company: j.company,
+          company_url: j.company_url,
           location: j.location,
-          // Format salary to readable format if number
           salary: isNaN(j.salary) ? j.salary : `₹${Math.round(j.salary).toLocaleString("en-IN")}`,
           salaryVal: Number(j.salary),
           jobType: j.job_type,
@@ -74,7 +77,6 @@ export default function JobList() {
       result = result.filter((j) => j.jobType === jobType);
     }
 
-    // Since experience field on backend jobs doesn't exist, we filter if matching requirements or skip
     if (experience !== "Any") {
       const expQ = experience.toLowerCase();
       result = result.filter(
@@ -92,7 +94,6 @@ export default function JobList() {
     setFilteredJobs(result);
   };
 
-  // Run filter logic whenever filter variables or jobs list updates
   useEffect(() => {
     handleSearch();
   }, [search, location, jobType, experience, salary, jobs]);
@@ -105,30 +106,38 @@ export default function JobList() {
     setSalary("Any");
   };
 
-  return (
-    <div className="py-10">
+  // Get unique locations from actual jobs
+  const availableLocations = Array.from(new Set(jobs.map((j) => j.location).filter(Boolean)));
 
-      <h1 className="text-4xl font-bold mb-8">
-        Explore Jobs
-      </h1>
+  return (
+    <div className="py-6 max-w-7xl mx-auto px-4">
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+            Explore Job Openings
+          </h1>
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">
+            Discover your next career opportunity from top verified employers
+          </p>
+        </div>
+        <div className="mt-4 md:mt-0 text-sm font-semibold text-gray-500 bg-gray-100 px-4 py-2 rounded-xl">
+          Showing <span className="text-blue-600 font-bold">{filteredJobs.length}</span> jobs
+        </div>
+      </div>
 
       <SearchBar
         search={search}
         setSearch={setSearch}
         location={location}
         setLocation={setLocation}
+        availableLocations={availableLocations}
+        onSearchSubmit={handleSearch}
       />
 
-      <div
-        className="
-          grid
-          grid-cols-1
-          lg:grid-cols-4
-          gap-8
-        "
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-        {/* Sidebar */}
+        {/* Sidebar Filter */}
         <div className="lg:col-span-1">
           <FilterSidebar
             jobType={jobType}
@@ -137,21 +146,15 @@ export default function JobList() {
             setExperience={setExperience}
             salary={salary}
             setSalary={setSalary}
+            location={location}
+            setLocation={setLocation}
             handleClear={handleClear}
           />
         </div>
 
         {/* Job Grid */}
         <div className="lg:col-span-3">
-          <div
-            className="
-              grid
-              grid-cols-1
-              md:grid-cols-2
-              xl:grid-cols-3
-              gap-6
-            "
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
             {loading ? (
 
@@ -161,15 +164,26 @@ export default function JobList() {
 
             ) : filteredJobs.length === 0 ? (
 
-              <div className="col-span-full text-center py-20 bg-white rounded-xl shadow border">
+              <div className="col-span-full text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
 
-                <h2 className="text-2xl font-bold text-gray-700">
-                  No Jobs Found
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                  🔍
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-800">
+                  No Matching Jobs Found
                 </h2>
 
-                <p className="text-gray-500 mt-3">
-                  Try another search or reset your filters.
+                <p className="text-gray-500 mt-2 text-sm max-w-md mx-auto">
+                  We couldn't find any jobs matching your current filter criteria. Try adjusting location or keyword parameters.
                 </p>
+
+                <button
+                  onClick={handleClear}
+                  className="mt-6 bg-blue-600 text-white font-semibold text-sm px-6 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-md shadow-blue-500/20"
+                >
+                  Reset All Filters
+                </button>
 
               </div>
 

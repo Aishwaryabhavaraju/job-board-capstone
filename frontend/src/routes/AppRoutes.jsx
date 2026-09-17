@@ -2,13 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import MainLayout from "../layouts/MainLayout";
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import JobList from "../pages/JobList";
 import JobDetail from "../pages/JobDetail";
+import Profile from "../pages/Profile";
 
 import EmployerDashboard from "../pages/EmployerDashboard";
 import CandidateDashboard from "../pages/CandidateDashboard";
@@ -47,72 +47,124 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 export default function AppRoutes() {
   const { user } = useAuth();
+
   return (
     <Routes>
-
-      {/* Public Layout */}
+      {/* Main Layout containing top Navbar for ALL pages */}
       <Route element={<MainLayout />}>
+
+        {/* Public Pages */}
         <Route path="/" element={<Home />} />
         <Route path="/jobs" element={<JobList />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
+
+        {/* Authentication Pages - Navbar present, redirect if already logged in */}
+        <Route
+          path="/login"
+          element={
+            user ? (
+              <Navigate
+                to={user.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard"}
+                replace
+              />
+            ) : (
+              <Login />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            user ? (
+              <Navigate
+                to={user.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard"}
+                replace
+              />
+            ) : (
+              <Register />
+            )
+          }
+        />
+
+        {/* Protected Profile Route for both Candidate and Employer */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["candidate", "employer"]}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Employer Dashboard Routes */}
+        <Route
+          path="/employer/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <EmployerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employer/jobs/new"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <PostJob />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employer/jobs/edit/:id"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <PostJob />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employer/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <MyJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employer/applications"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <EmployerApplications />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Candidate Dashboard Routes */}
+        <Route
+          path="/candidate/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["candidate"]}>
+              <CandidateDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidate/applications"
+          element={
+            <ProtectedRoute allowedRoles={["candidate"]}>
+              <AppliedJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidate/saved"
+          element={
+            <ProtectedRoute allowedRoles={["candidate"]}>
+              <SavedJobs />
+            </ProtectedRoute>
+          }
+        />
+
       </Route>
-
-      {/* Authentication Pages - redirect if already logged in */}
-      <Route
-        path="/login"
-        element={
-          user ? (
-            <Navigate
-              to={user.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard"}
-              replace
-            />
-          ) : (
-            <Login />
-          )
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          user ? (
-            <Navigate
-              to={user.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard"}
-              replace
-            />
-          ) : (
-            <Register />
-          )
-        }
-      />
-
-      {/* Employer Dashboard Routes */}
-      <Route
-        element={
-          <ProtectedRoute allowedRoles={["employer"]}>
-            <DashboardLayout role="employer" />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-        <Route path="/employer/jobs/new" element={<PostJob />} />
-        <Route path="/employer/jobs/edit/:id" element={<PostJob />} />
-        <Route path="/employer/jobs" element={<MyJobs />} />
-        <Route path="/employer/applications" element={<EmployerApplications />} />
-      </Route>
-
-      {/* Candidate Dashboard Routes */}
-      <Route
-        element={
-          <ProtectedRoute allowedRoles={["candidate"]}>
-            <DashboardLayout role="candidate" />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
-        <Route path="/candidate/applications" element={<AppliedJobs />} />
-        <Route path="/candidate/saved" element={<SavedJobs />} />
-      </Route>
-
     </Routes>
   );
 }

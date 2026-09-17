@@ -16,6 +16,12 @@ class Job(models.Model):
 
     company = models.CharField(max_length=200)
 
+    company_url = models.URLField(
+        max_length=500,
+        blank=True,
+        default=""
+    )
+
     location = models.CharField(max_length=150)
 
     job_type = models.CharField(

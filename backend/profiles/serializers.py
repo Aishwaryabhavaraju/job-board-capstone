@@ -122,14 +122,6 @@ class ApplicantProfileSerializer(serializers.ModelSerializer):
 
         user = request.user
 
-        # Only Job Seekers
-
-        if user.role != "job_seeker":
-
-            raise serializers.ValidationError(
-                "Only Job Seekers can create an applicant profile."
-            )
-
         # Prevent Duplicate Profile
 
         if ApplicantProfile.objects.filter(user=user).exists():

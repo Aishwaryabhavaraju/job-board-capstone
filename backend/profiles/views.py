@@ -26,14 +26,8 @@ class ApplicantProfileViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Create profile for logged-in Job Seeker.
+        Create profile for logged-in user.
         """
-
-        if self.request.user.role != "job_seeker":
-            raise PermissionDenied(
-                "Only Job Seekers can create profiles."
-            )
-
         serializer.save(
             user=self.request.user
         )
